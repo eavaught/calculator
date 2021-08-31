@@ -128,6 +128,11 @@ QString QCalcWidget::operationToString( Operations op )
 
 void QCalcWidget::addDecimalIfApplicable()
 {
+  if ( vFirst ) {
+    vUi->mLineEdit->setText( "0." );
+    vFirst = false;
+    return;
+  }
   QString currentNumber = vUi->mLineEdit->text();
   if ( currentNumber.contains( "." ) ) {
     return;
