@@ -28,21 +28,21 @@ QCalcWidget::QCalcWidget( QWidget* parent ) : QWidget( parent ), vUi( new Ui::QC
 
   connect( vUi->mButton_Clear, &QAbstractButton::pressed, this, [&]() { clearButtonPushed(); } );
 
-  std::vector<std::tuple<QToolButton*, QString, Operations>> opsButtons{
-    { vUi->mButton_Plus, " + ", Plus },
-    { vUi->mButton_Multiply, " x ", Multiply },
-    { vUi->mButton_Divide, " / ", Divide },
-    { vUi->mButton_Subtract, " - ", Minus }
-  };
+  std::vector<std::tuple<QToolButton*, Operations>> opsButtons{ { vUi->mButton_Plus, Plus },
+                                                                { vUi->mButton_Multiply, Multiply },
+                                                                { vUi->mButton_Divide, Divide },
+                                                                { vUi->mButton_Subtract, Minus } };
 
   for ( auto& button : opsButtons ) {
     connect( std::get<0>( button ), &QAbstractButton::pressed, this, [&, button]() {
-      moveTextToHistory( std::get<1>( button ) );
-      operation = std::get<2>( button );
+      operationButtonPushed( std::get<1>( button ) );
+      vOperation = std::get<1>( button );
     } );
   }
 
   connect( vUi->mButton_Answer, &QAbstractButton::pressed, this, [&]() { calculateAnswer(); } );
+
+  connect( vUi->mButton_Dot, &QAbstractButton::pressed, this, [&]() { addDecimalIfApplicable(); } );
 }
 
 QCalcWidget::~QCalcWidget() = default;
@@ -51,27 +51,38 @@ QCalcWidget::~QCalcWidget() = default;
 void QCalcWidget::numberButtonPushed( int number )
 {
   if ( number == 0 && vUi->mLineEdit->text() == "0" ) {
-    // Do Nothing here maybe?
-  } else {
-    if ( vUi->mLineEdit->text() == "0" ) {
-      vUi->mLineEdit->clear();
-    }
-    vUi->mLineEdit->setText( vUi->mLineEdit->text() + QString( "%1" ).arg( number ) );
+    return;
   }
+  if ( vUi->mLineEdit->text() == "0" || vFirst ) {
+    vUi->mLineEdit->clear();
+  }
+  vUi->mLineEdit->setText( vUi->mLineEdit->text() + QString( "%1" ).arg( number ) );
+
+  vFirst = false;
 }
 
 void QCalcWidget::clearButtonPushed()
 {
   resetLineEdit();
   vUi->mHistory->clear();
+  vFirstNumber.reset();
+  vSecondNumber.reset();
+  vOperation = None;
+  vFirst = true;
 }
 
-void QCalcWidget::moveTextToHistory( QString ops )
+void QCalcWidget::operationButtonPushed( Operations op )
 {
+  if ( vFirstNumber ) {
+    QString number = vUi->mLineEdit->text();
+    vSecondNumber = number.toDouble();
+    math();
+  }
   QString number = vUi->mLineEdit->text();
-  firstNumber = number.toInt();
-  vUi->mHistory->setText( number + ops );
-  resetLineEdit();
+  vFirstNumber = number.toDouble();
+  vUi->mHistory->setText( number + " " + operationToString( op ) + " " );
+  vSecondNumber.reset();
+  vFirst = true;
 }
 
 void QCalcWidget::resetLineEdit()
@@ -82,25 +93,63 @@ void QCalcWidget::resetLineEdit()
 void QCalcWidget::calculateAnswer()
 {
   QString number = vUi->mLineEdit->text();
-  secondNumber = number.toInt();
-  vUi->mHistory->setText( vUi->mHistory->text() + number + " = " );
+  if ( vSecondNumber ) {
+    vFirstNumber = number.toDouble();
+  } else {
+    vSecondNumber = number.toDouble();
+  }
 
-  int answer = 0;
-  switch ( operation ) {
+  vUi->mHistory->setText( QString( "%1" ).arg( *vFirstNumber ) + " " +
+                          operationToString( vOperation ) + " " +
+                          QString( "%1" ).arg( *vSecondNumber ) + " = " );
+
+  math();
+  vFirst = true;
+}
+
+
+QString QCalcWidget::operationToString( Operations op )
+{
+  switch ( op ) {
     case Plus:
-      answer = firstNumber + secondNumber;
+      return "+";
+    case Minus:
+      return "−";
+    case Multiply:
+      return "×";
+    case Divide:
+      return "÷";
+    case None:
+      break;
+  }
+  return "";
+}
+
+
+void QCalcWidget::addDecimalIfApplicable()
+{
+  QString currentNumber = vUi->mLineEdit->text();
+  if ( currentNumber.contains( "." ) ) {
+    return;
+  }
+  vUi->mLineEdit->setText( currentNumber + "." );
+}
+
+void QCalcWidget::math()
+{
+  double answer = 0;
+  switch ( vOperation ) {
+    case Plus:
+      answer = *vFirstNumber + *vSecondNumber;
       break;
     case Minus:
-      answer = firstNumber - secondNumber;
-
+      answer = *vFirstNumber - *vSecondNumber;
       break;
     case Multiply:
-      answer = firstNumber * secondNumber;
-
+      answer = *vFirstNumber * *vSecondNumber;
       break;
     case Divide:
-      answer = firstNumber / secondNumber;
-
+      answer = *vFirstNumber / *vSecondNumber;
       break;
     case None:
       break;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QWidget>
+#include <optional>
+
 
 namespace Ui {
 class QCalcWidget;
@@ -19,14 +21,19 @@ private:
 private:
   void numberButtonPushed( int number );
   void clearButtonPushed();
-  void moveTextToHistory( QString ops );
+  void operationButtonPushed( Operations op );
   void resetLineEdit();
   void calculateAnswer();
+  QString operationToString( Operations op );
+  void addDecimalIfApplicable();
+  void math();
 
 private:
   std::unique_ptr<Ui::QCalcWidget> vUi;
 
-  int firstNumber = 0;
-  int secondNumber = 0;
-  Operations operation = None;
+  std::optional<double> vFirstNumber;
+  std::optional<double> vSecondNumber;
+  Operations vOperation = None;
+
+  bool vFirst = true;
 };

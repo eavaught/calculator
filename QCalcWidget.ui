@@ -79,6 +79,9 @@
      </item>
      <item row="0" column="0">
       <widget class="QToolButton" name="mButton_LParen">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -115,6 +118,9 @@
      </item>
      <item row="0" column="2">
       <widget class="QToolButton" name="mButton_Unknown">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -127,7 +133,7 @@
         </font>
        </property>
        <property name="text">
-        <string>??</string>
+        <string>+/−</string>
        </property>
       </widget>
      </item>
@@ -151,6 +157,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QToolButton" name="mButton_RightParen">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -343,7 +352,7 @@
         </font>
        </property>
        <property name="text">
-        <string>/</string>
+        <string>÷</string>
        </property>
       </widget>
      </item>
@@ -361,7 +370,7 @@
         </font>
        </property>
        <property name="text">
-        <string>X</string>
+        <string>×</string>
        </property>
       </widget>
      </item>
@@ -379,7 +388,7 @@
         </font>
        </property>
        <property name="text">
-        <string>-</string>
+        <string>−</string>
        </property>
       </widget>
      </item>
