@@ -10,6 +10,13 @@ class QCalcWidget;
 
 /*!
  * \brief The QCalcWidget class, a widget with very basic calculator functionality.
+ *
+ *        Example Equation:
+ *
+ *        2 + 4 = 6
+ *        \ \ +------- vSecondNumber
+ *        \ +--------- vOperation
+ *        +----------- vFirstNumber
  */
 class QCalcWidget : public QWidget
 {
