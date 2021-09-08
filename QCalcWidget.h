@@ -8,6 +8,9 @@ namespace Ui {
 class QCalcWidget;
 }
 
+/*!
+ * \brief The QCalcWidget class, a widget with very basic calculator functionality.
+ */
 class QCalcWidget : public QWidget
 {
   Q_OBJECT
@@ -23,10 +26,10 @@ private:
   void clearButtonPushed();
   void operationButtonPushed( Operations op );
   void resetLineEdit();
-  void calculateAnswer();
+  void equalsButtonPushed();
   QString operationToString( Operations op );
   void addDecimalIfApplicable();
-  void math();
+  void calculation();
 
 private:
   std::unique_ptr<Ui::QCalcWidget> vUi;

@@ -2,7 +2,10 @@
 #include "ui_QCalcWidget.h"
 #include <iostream>
 
-
+/*!
+ * \brief Sets up the UI and signal/slot connections for the calculator buttons.
+ * \param parent Widget parent used for default widget behavior and widget cleanup.
+ */
 QCalcWidget::QCalcWidget( QWidget* parent ) : QWidget( parent ), vUi( new Ui::QCalcWidget )
 {
   vUi->setupUi( this );
@@ -40,14 +43,26 @@ QCalcWidget::QCalcWidget( QWidget* parent ) : QWidget( parent ), vUi( new Ui::QC
     } );
   }
 
-  connect( vUi->mButton_Answer, &QAbstractButton::pressed, this, [&]() { calculateAnswer(); } );
+  connect( vUi->mButton_Answer, &QAbstractButton::pressed, this, [&]() { equalsButtonPushed(); } );
 
   connect( vUi->mButton_Dot, &QAbstractButton::pressed, this, [&]() { addDecimalIfApplicable(); } );
+
+
+  // Extra buttons to complete the grid that have not been implemented yet.
+  vUi->mButton_LParen->hide();
+  vUi->mButton_RParen->hide();
+  vUi->mButton_Unknown->hide();
 }
 
 QCalcWidget::~QCalcWidget() = default;
 
 
+/*!
+ * \brief Called when any of the number buttons are pushed.
+ *        Specialized logic for if this is the first time a number has been pushed after an
+ *        operation or equals that overrides the number left in the line edit.
+ * \param number The number on the corresponding button that was pushed.
+ */
 void QCalcWidget::numberButtonPushed( int number )
 {
   if ( number == 0 && vUi->mLineEdit->text() == "0" ) {
@@ -61,6 +76,10 @@ void QCalcWidget::numberButtonPushed( int number )
   vFirst = false;
 }
 
+/*!
+ * \brief Called when the clear button is pushed. Resets all private data and line edit displays
+ *        back to their original state.
+ */
 void QCalcWidget::clearButtonPushed()
 {
   resetLineEdit();
@@ -71,12 +90,20 @@ void QCalcWidget::clearButtonPushed()
   vFirst = true;
 }
 
+
+/*!
+ * \brief Called when an operation button is pushed. If this is the first time an operation has
+ *        been pressed, the number is stored into the "First Number" data. If it is the second
+ *        (chaining operations together) the number is stored in the "Second Number" before
+ *        performing the previous operation.
+ * \param op The operation corresponding to the button that was pushed
+ */
 void QCalcWidget::operationButtonPushed( Operations op )
 {
   if ( vFirstNumber ) {
     QString number = vUi->mLineEdit->text();
     vSecondNumber = number.toDouble();
-    math();
+    calculation();
   }
   QString number = vUi->mLineEdit->text();
   vFirstNumber = number.toDouble();
@@ -85,12 +112,23 @@ void QCalcWidget::operationButtonPushed( Operations op )
   vFirst = true;
 }
 
+/*!
+ * \brief Hard code the ability to reset the input line to zero to avoid hardcoding the
+ *        zero string in multiple locations.
+ */
 void QCalcWidget::resetLineEdit()
 {
   vUi->mLineEdit->setText( "0" );
 }
 
-void QCalcWidget::calculateAnswer()
+
+/*!
+ * \brief Called when the equals button is pushed to do the mathematical calculations.
+ *        Different behavior if the equals button is pressed twice in a row, it attempts
+ *        to perform the calculation again with the previous result. (Behavior is similar to
+ *        iphone calculator and Windows calculator)
+ */
+void QCalcWidget::equalsButtonPushed()
 {
   QString number = vUi->mLineEdit->text();
   if ( vSecondNumber ) {
@@ -103,11 +141,17 @@ void QCalcWidget::calculateAnswer()
                           operationToString( vOperation ) + " " +
                           QString( "%1" ).arg( *vSecondNumber ) + " = " );
 
-  math();
+  calculation();
   vFirst = true;
+  vFirstNumber.reset();
 }
 
 
+/*!
+ * \brief Hardcoded string representations of the valid calculator operations.
+ * \param op The given operation
+ * \return The string representation
+ */
 QString QCalcWidget::operationToString( Operations op )
 {
   switch ( op ) {
@@ -126,6 +170,10 @@ QString QCalcWidget::operationToString( Operations op )
 }
 
 
+/*!
+ * \brief Called when the decimal button it pressed. This prevents the decimal from being added
+ *        to a number more than once.
+ */
 void QCalcWidget::addDecimalIfApplicable()
 {
   if ( vFirst ) {
@@ -140,7 +188,12 @@ void QCalcWidget::addDecimalIfApplicable()
   vUi->mLineEdit->setText( currentNumber + "." );
 }
 
-void QCalcWidget::math()
+
+/*!
+ * \brief Performs the mathmatical calculation for the given values and the operation.
+ *        This function is only valid for single operation with two numbers and one operand.
+ */
+void QCalcWidget::calculation()
 {
   double answer = 0;
   switch ( vOperation ) {
